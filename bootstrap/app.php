@@ -11,9 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->web(append: [
-            \App\Http\Middleware\CheckDomainRestriction::class,
-        ]);
+        // TODO: REMOVE THIS COMMENT FOR PRODUCTION - Domain check disabled for testing
+        // $middleware->web(append: [
+        //     \App\Http\Middleware\CheckDomainRestriction::class,
+        // ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

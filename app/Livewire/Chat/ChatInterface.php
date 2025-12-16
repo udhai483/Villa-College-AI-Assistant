@@ -3,8 +3,10 @@
 namespace App\Livewire\Chat;
 
 use App\Models\Conversation;
+use App\Models\KnowledgeBase;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Str;
 
 class ChatInterface extends Component
 {
@@ -80,14 +82,79 @@ class ChatInterface extends Component
 
     private function getAIResponse($message)
     {
-        // TODO: Implement actual RAG logic here
-        // 1. Search knowledge base for relevant context
-        // 2. Create prompt with context
-        // 3. Call OpenAI API
-        // 4. Return response
+        // Extract keywords from user message
+        $keywords = $this->extractKeywords($message);
         
-        // Placeholder response
-        return "Thank you for your question about Villa College. This is a placeholder response. The actual AI response will be implemented using RAG (Retrieval-Augmented Generation) with the scraped Villa College website data. The system will search the knowledge base for relevant information and generate a contextual response based only on the available data.";
+        // Search knowledge base for relevant content
+        $relevantChunks = $this->searchKnowledgeBase($keywords);
+        
+        if ($relevantChunks->isEmpty()) {
+            return "I apologize, but I couldn't find specific information about that in our Villa College knowledge base. Could you please rephrase your question or ask about our programs, admissions, campus facilities, or student life?";
+        }
+        
+        // Build response from relevant chunks
+        $response = $this->buildResponse($message, $relevantChunks);
+        
+        return $response;
+    }
+    
+    private function extractKeywords($message)
+    {
+        // Convert to lowercase and remove punctuation
+        $cleaned = strtolower($message);
+        $cleaned = preg_replace('/[^\w\s]/', '', $cleaned);
+        
+        // Common stop words to filter out
+        $stopWords = ['what', 'how', 'when', 'where', 'who', 'why', 'is', 'are', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'about', 'me', 'tell', 'can', 'you', 'please', 'i', 'want', 'know', 'do', 'does'];
+        
+        // Split into words and filter
+        $words = explode(' ', $cleaned);
+        $keywords = array_filter($words, function($word) use ($stopWords) {
+            return strlen($word) > 2 && !in_array($word, $stopWords);
+        });
+        
+        return array_values($keywords);
+    }
+    
+    private function searchKnowledgeBase($keywords)
+    {
+        if (empty($keywords)) {
+            return collect([]);
+        }
+        
+        // Build query to search for keywords in content
+        $query = KnowledgeBase::query();
+        
+        foreach ($keywords as $keyword) {
+            $query->orWhere('content', 'LIKE', "%{$keyword}%");
+        }
+        
+        // Get top 3 most relevant chunks
+        return $query->limit(3)->get();
+    }
+    
+    private function buildResponse($question, $chunks)
+    {
+        // Combine relevant content
+        $context = $chunks->pluck('content')->implode("\n\n");
+        
+        // If context is too short, provide direct answer
+        if (strlen($context) < 100) {
+            return $context;
+        }
+        
+        // Build a structured response
+        $response = "Based on Villa College information:\n\n";
+        
+        // Add each chunk as a point
+        foreach ($chunks as $index => $chunk) {
+            $snippet = Str::limit($chunk->content, 250);
+            $response .= $snippet . "\n\n";
+        }
+        
+        $response .= "If you need more specific information, please feel free to ask!";
+        
+        return $response;
     }
 
     public function render()
