@@ -7,6 +7,7 @@ use App\Models\KnowledgeBase;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class ChatInterface extends Component
 {
@@ -125,6 +126,73 @@ class ChatInterface extends Component
 
     private function getAIResponse($message)
     {
+        // Try semantic search first (if embeddings exist)
+        $hasEmbeddings = KnowledgeBase::whereNotNull('embedding')->exists();
+        
+        if ($hasEmbeddings) {
+            try {
+                return $this->getSemanticResponse($message);
+            } catch (\Exception $e) {
+                // Fall back to keyword search on error
+                \Log::warning('Semantic search failed, falling back to keyword search: ' . $e->getMessage());
+            }
+        }
+        
+        // Fallback to keyword search
+        return $this->getKeywordResponse($message);
+    }
+    
+    private function getSemanticResponse($message)
+    {
+        // Generate embedding for user query
+        $response = OpenAI::embeddings()->create([
+            'model' => 'text-embedding-ada-002',
+            'input' => $message,
+        ]);
+        
+        $queryEmbedding = $response->embeddings[0]->embedding;
+        
+        // Find most similar chunks using cosine similarity
+        $relevantChunks = $this->searchBySimilarity($queryEmbedding, 5);
+        
+        if ($relevantChunks->isEmpty()) {
+            return [
+                'response' => "I apologize, but I couldn't find relevant information about that in our Villa College knowledge base. Could you please rephrase your question?",
+                'sources' => []
+            ];
+        }
+        
+        // Build context from chunks
+        $context = $relevantChunks->map(fn($chunk) => $chunk->content)->implode("\n\n");
+        
+        // Use GPT to generate natural response
+        $gptResponse = OpenAI::chat()->create([
+            'model' => 'gpt-4o-mini',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => "You are a helpful assistant for Villa College in the Maldives. Use the provided context to answer questions accurately and naturally. If the context doesn't contain enough information, say so. Always be concise but informative. Format responses in a clear, readable way."
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Context:\n{$context}\n\nQuestion: {$message}"
+                ]
+            ],
+            'temperature' => 0.7,
+            'max_tokens' => 500,
+        ]);
+        
+        $answer = $gptResponse->choices[0]->message->content;
+        $sources = $relevantChunks->map(fn($chunk) => $chunk->source_url)->unique()->values()->toArray();
+        
+        return [
+            'response' => $answer,
+            'sources' => $sources
+        ];
+    }
+    
+    private function getKeywordResponse($message)
+    {
         // Extract keywords from user message
         $keywords = $this->extractKeywords($message);
         
@@ -146,6 +214,48 @@ class ChatInterface extends Component
             'response' => $response,
             'sources' => $sources
         ];
+    }
+    
+    private function searchBySimilarity($queryEmbedding, $limit = 5)
+    {
+        // Get all chunks with embeddings
+        $chunks = KnowledgeBase::whereNotNull('embedding')->get();
+        
+        // Calculate cosine similarity for each chunk
+        $scored = $chunks->map(function($chunk) use ($queryEmbedding) {
+            $chunkEmbedding = is_string($chunk->embedding) 
+                ? json_decode($chunk->embedding, true) 
+                : $chunk->embedding;
+            
+            $similarity = $this->cosineSimilarity($queryEmbedding, $chunkEmbedding);
+            $chunk->similarity_score = $similarity;
+            return $chunk;
+        });
+        
+        // Sort by similarity (highest first) and return top chunks
+        return $scored->sortByDesc('similarity_score')->take($limit)->values();
+    }
+    
+    private function cosineSimilarity($vec1, $vec2)
+    {
+        $dotProduct = 0;
+        $magnitude1 = 0;
+        $magnitude2 = 0;
+        
+        for ($i = 0; $i < count($vec1); $i++) {
+            $dotProduct += $vec1[$i] * $vec2[$i];
+            $magnitude1 += $vec1[$i] * $vec1[$i];
+            $magnitude2 += $vec2[$i] * $vec2[$i];
+        }
+        
+        $magnitude1 = sqrt($magnitude1);
+        $magnitude2 = sqrt($magnitude2);
+        
+        if ($magnitude1 == 0 || $magnitude2 == 0) {
+            return 0;
+        }
+        
+        return $dotProduct / ($magnitude1 * $magnitude2);
     }
     
     private function extractKeywords($message)
