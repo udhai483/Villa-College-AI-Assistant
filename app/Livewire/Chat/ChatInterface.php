@@ -4,9 +4,11 @@ namespace App\Livewire\Chat;
 
 use App\Models\Conversation;
 use App\Models\KnowledgeBase;
+use App\Models\ChatMetric;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class ChatInterface extends Component
@@ -126,69 +128,161 @@ class ChatInterface extends Component
 
     private function getAIResponse($message)
     {
-        // Try semantic search first (if embeddings exist)
-        $hasEmbeddings = KnowledgeBase::whereNotNull('embedding')->exists();
+        $startTime = microtime(true);
+        $searchMethod = 'keyword';
+        $hadFallback = false;
+        $error = null;
+        $resultCount = 0;
         
-        if ($hasEmbeddings) {
-            try {
-                return $this->getSemanticResponse($message);
-            } catch (\Exception $e) {
-                // Fall back to keyword search on error
-                \Log::warning('Semantic search failed, falling back to keyword search: ' . $e->getMessage());
+        try {
+            // Try semantic search first (if embeddings exist)
+            $hasEmbeddings = KnowledgeBase::whereNotNull('embedding')->exists();
+            
+            if ($hasEmbeddings) {
+                try {
+                    $searchMethod = 'semantic';
+                    $result = $this->getSemanticResponse($message);
+                    $resultCount = count($result['sources']);
+                    
+                    // Log metrics
+                    $this->logMetrics($message, $startTime, $searchMethod, $resultCount, $hadFallback, $error);
+                    
+                    return $result;
+                } catch (\Exception $e) {
+                    // Fall back to keyword search on error
+                    $hadFallback = true;
+                    $error = 'Semantic search failed: ' . $e->getMessage();
+                    Log::warning('Semantic search failed, falling back to keyword search', [
+                        'query' => $message,
+                        'error' => $e->getMessage(),
+                        'user_id' => auth()->id(),
+                    ]);
+                }
             }
+            
+            // Fallback to keyword search
+            $searchMethod = $hasEmbeddings ? 'keyword' : 'keyword'; // If we fell back, it's still keyword
+            $result = $this->getKeywordResponse($message);
+            $resultCount = count($result['sources']);
+            
+            // Check for empty results
+            if ($resultCount === 0) {
+                Log::info('No results found for query', [
+                    'query' => $message,
+                    'search_method' => $searchMethod,
+                    'user_id' => auth()->id(),
+                ]);
+            }
+            
+            // Log metrics
+            $this->logMetrics($message, $startTime, $searchMethod, $resultCount, $hadFallback, $error);
+            
+            return $result;
+            
+        } catch (\Exception $e) {
+            $searchMethod = 'failed';
+            $error = $e->getMessage();
+            
+            Log::error('Complete search failure', [
+                'query' => $message,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+            ]);
+            
+            // Log failed metrics
+            $this->logMetrics($message, $startTime, $searchMethod, 0, $hadFallback, $error);
+            
+            return [
+                'response' => "I apologize, but I encountered an error while processing your question. Please try again or contact support if the problem persists.",
+                'sources' => []
+            ];
         }
-        
-        // Fallback to keyword search
-        return $this->getKeywordResponse($message);
+    }
+    
+    private function logMetrics($query, $startTime, $searchMethod, $resultCount, $hadFallback, $error)
+    {
+        try {
+            $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+            
+            ChatMetric::create([
+                'user_id' => auth()->id(),
+                'conversation_id' => $this->currentConversationId,
+                'query' => $query,
+                'response_time_ms' => $responseTimeMs,
+                'search_method' => $searchMethod,
+                'result_count' => $resultCount,
+                'error' => $error,
+                'had_fallback' => $hadFallback,
+            ]);
+        } catch (\Exception $e) {
+            // Don't fail the request if metrics logging fails
+            Log::error('Failed to log metrics', ['error' => $e->getMessage()]);
+        }
     }
     
     private function getSemanticResponse($message)
     {
-        // Generate embedding for user query
-        $response = OpenAI::embeddings()->create([
-            'model' => 'text-embedding-ada-002',
-            'input' => $message,
-        ]);
-        
-        $queryEmbedding = $response->embeddings[0]->embedding;
-        
-        // Find most similar chunks using cosine similarity
-        $relevantChunks = $this->searchBySimilarity($queryEmbedding, 5);
-        
-        if ($relevantChunks->isEmpty()) {
-            return [
-                'response' => "I apologize, but I couldn't find relevant information about that in our Villa College knowledge base. Could you please rephrase your question?",
-                'sources' => []
-            ];
-        }
-        
-        // Build context from chunks
-        $context = $relevantChunks->map(fn($chunk) => $chunk->content)->implode("\n\n");
-        
-        // Use GPT to generate natural response
-        $gptResponse = OpenAI::chat()->create([
-            'model' => 'gpt-4o-mini',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "You are a helpful assistant for Villa College in the Maldives. Use the provided context to answer questions accurately and naturally. If the context doesn't contain enough information, say so. Always be concise but informative. Format responses in a clear, readable way."
+        try {
+            // Generate embedding for user query
+            $response = OpenAI::embeddings()->create([
+                'model' => 'text-embedding-ada-002',
+                'input' => $message,
+            ]);
+            
+            $queryEmbedding = $response->embeddings[0]->embedding;
+            
+            // Find most similar chunks using cosine similarity
+            $relevantChunks = $this->searchBySimilarity($queryEmbedding, 5);
+            
+            if ($relevantChunks->isEmpty()) {
+                Log::info('Semantic search returned no results', [
+                    'query' => $message,
+                    'user_id' => auth()->id(),
+                ]);
+                
+                return [
+                    'response' => "I apologize, but I couldn't find relevant information about that in our Villa College knowledge base. Could you please rephrase your question?",
+                    'sources' => []
+                ];
+            }
+            
+            // Build context from chunks
+            $context = $relevantChunks->map(fn($chunk) => $chunk->content)->implode("\n\n");
+            
+            // Use GPT to generate natural response
+            $gptResponse = OpenAI::chat()->create([
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => "You are a helpful assistant for Villa College in the Maldives. Use the provided context to answer questions accurately and naturally. If the context doesn't contain enough information, say so. Always be concise but informative. Format responses in a clear, readable way."
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Context:\n{$context}\n\nQuestion: {$message}"
+                    ]
                 ],
-                [
-                    'role' => 'user',
-                    'content' => "Context:\n{$context}\n\nQuestion: {$message}"
-                ]
-            ],
-            'temperature' => 0.7,
-            'max_tokens' => 500,
-        ]);
-        
-        $answer = $gptResponse->choices[0]->message->content;
-        $sources = $relevantChunks->map(fn($chunk) => $chunk->source_url)->unique()->values()->toArray();
-        
-        return [
-            'response' => $answer,
-            'sources' => $sources
-        ];
+                'temperature' => 0.7,
+                'max_tokens' => 500,
+            ]);
+            
+            $answer = $gptResponse->choices[0]->message->content;
+            $sources = $relevantChunks->map(fn($chunk) => $chunk->source_url)->unique()->values()->toArray();
+            
+            return [
+                'response' => $answer,
+                'sources' => $sources
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('GPT response generation failed', [
+                'query' => $message,
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id(),
+            ]);
+            throw $e; // Re-throw to trigger fallback
+        }
     }
     
     private function getKeywordResponse($message)

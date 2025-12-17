@@ -23,3 +23,7 @@ Route::post('/logout', [App\Http\Controllers\Auth\GoogleController::class, 'logo
 Route::get('/chat', App\Livewire\Chat\ChatInterface::class)
     ->name('chat')
     ->middleware('auth');
+
+// Health check endpoint (no auth required for monitoring)
+Route::get('/api/health', [App\Http\Controllers\HealthCheckController::class, 'index'])
+    ->name('health.check');
