@@ -11,10 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // TODO: REMOVE THIS COMMENT FOR PRODUCTION - Domain check disabled for testing
-        // $middleware->web(append: [
-        //     \App\Http\Middleware\CheckDomainRestriction::class,
-        // ]);
+        // Rate limiting for API endpoints
+        $middleware->alias([
+            'throttle.chat' => \Illuminate\Routing\Middleware\ThrottleRequests::class.':60,1',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

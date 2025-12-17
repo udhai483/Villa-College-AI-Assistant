@@ -9,6 +9,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use OpenAI\Laravel\Facades\OpenAI;
 
 class ChatInterface extends Component
@@ -19,6 +20,8 @@ class ChatInterface extends Component
     public $currentConversationId = null;
     public $conversations = [];
     public $showSidebar = true;
+    
+    protected $listeners = ['message-sent' => '$refresh'];
 
     public function mount()
     {
@@ -84,6 +87,23 @@ class ChatInterface extends Component
         if (empty(trim($this->userInput))) {
             return;
         }
+        
+        // Rate limiting: 20 messages per minute per user
+        $key = 'chat-limit:' . auth()->id();
+        
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            $this->dispatch('rate-limit-exceeded');
+            $this->messages[] = [
+                'type' => 'ai',
+                'content' => 'You are sending messages too quickly. Please wait a moment before trying again.',
+                'time' => now()->format('h:i A'),
+                'sources' => [],
+            ];
+            $this->isLoading = false;
+            return;
+        }
+        
+        RateLimiter::hit($key, 60); // 60 seconds decay
 
         $userMessage = $this->userInput;
         $this->userInput = '';

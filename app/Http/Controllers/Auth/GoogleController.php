@@ -19,22 +19,21 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
             
-            // TODO: REMOVE THIS COMMENT FOR PRODUCTION - Domain check disabled for testing
-            // Check if email domain is authorized
-            // $authorizedDomains = ['@villacollege.edu.mv', '@students.villacollege.edu.mv'];
-            // $isAuthorized = false;
+            // Check if email domain is authorized (PRODUCTION)
+            $authorizedDomains = ['@villacollege.edu.mv', '@students.villacollege.edu.mv'];
+            $isAuthorized = false;
             
-            // foreach ($authorizedDomains as $domain) {
-            //     if (str_ends_with($googleUser->email, $domain)) {
-            //         $isAuthorized = true;
-            //         break;
-            //     }
-            // }
+            foreach ($authorizedDomains as $domain) {
+                if (str_ends_with($googleUser->email, $domain)) {
+                    $isAuthorized = true;
+                    break;
+                }
+            }
             
-            // if (!$isAuthorized) {
-            //     return redirect()->route('login')
-            //         ->with('error', 'Access denied. Only @villacollege.edu.mv and @students.villacollege.edu.mv email addresses are allowed.');
-            // }
+            if (!$isAuthorized) {
+                return redirect()->route('login')
+                    ->with('error', 'Access denied. Only @villacollege.edu.mv and @students.villacollege.edu.mv email addresses are allowed.');
+            }
             
             // Find or create user
             $user = User::updateOrCreate(
