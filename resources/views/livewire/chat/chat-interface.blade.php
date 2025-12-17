@@ -1,9 +1,48 @@
-<div class="h-screen flex flex-col bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="h-screen flex bg-gray-50">
+    <!-- Sidebar -->
+    <div class="{{ $showSidebar ? 'w-64' : 'w-0' }} bg-white border-r border-gray-200 transition-all duration-300 overflow-hidden">
+        <div class="h-full flex flex-col">
+            <!-- Sidebar Header -->
+            <div class="p-4 border-b border-gray-200">
+                <button wire:click="startNewConversation" 
+                        class="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition flex items-center justify-center space-x-2">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span class="font-medium">New Chat</span>
+                </button>
+            </div>
+            
+            <!-- Conversation History -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-2">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide px-2 mb-2">Recent Conversations</h3>
+                @forelse($conversations as $conv)
+                    <button wire:click="loadConversation({{ $conv['id'] }})"
+                            class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 transition {{ $currentConversationId == $conv['id'] ? 'bg-primary-50 border border-primary-200' : 'border border-transparent' }}">
+                        <p class="text-sm text-gray-800 truncate">{{ $conv['preview'] }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ $conv['time'] }}</p>
+                    </button>
+                @empty
+                    <p class="text-xs text-gray-500 text-center py-4">No conversations yet</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-3">
+                    <!-- Sidebar Toggle -->
+                    <button wire:click="toggleSidebar" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    
                     <div class="h-10 w-10 bg-primary-600 rounded-lg flex items-center justify-center">
                         <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -16,6 +55,17 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <!-- Clear Chat Button -->
+                    @if(!empty($messages))
+                        <button wire:click="startNewConversation" 
+                                class="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition flex items-center space-x-2">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            <span>Clear</span>
+                        </button>
+                    @endif
+                    
                     <div class="hidden sm:flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
                         <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="h-7 w-7 rounded-full">
                         <div class="text-right">
@@ -88,7 +138,25 @@
                             <!-- Message Content -->
                             <div class="flex flex-col {{ $message['type'] === 'user' ? 'items-end' : 'items-start' }}">
                                 <div class="px-4 py-3 rounded-2xl {{ $message['type'] === 'user' ? 'bg-primary-600 text-white' : 'bg-white text-gray-800 shadow-sm border border-gray-200' }}">
-                                    <p class="text-sm leading-relaxed">{{ $message['content'] }}</p>
+                                    <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ $message['content'] }}</p>
+                                    
+                                    <!-- Source URLs for AI messages -->
+                                    @if($message['type'] === 'ai' && isset($message['sources']) && !empty($message['sources']))
+                                        <div class="mt-3 pt-3 border-t border-gray-200">
+                                            <p class="text-xs font-semibold text-gray-500 mb-2">Sources:</p>
+                                            <div class="space-y-1">
+                                                @foreach($message['sources'] as $source)
+                                                    <a href="{{ $source }}" target="_blank" 
+                                                       class="flex items-center space-x-1 text-xs text-primary-600 hover:text-primary-700 hover:underline">
+                                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                        <span class="truncate">{{ Str::limit($source, 50) }}</span>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                                 <span class="text-xs text-gray-500 mt-1 px-2">{{ $message['time'] }}</span>
                             </div>
@@ -148,6 +216,8 @@
             </p>
         </div>
     </div>
+    </div>
+    <!-- End Main Content -->
 
     @script
     <script>

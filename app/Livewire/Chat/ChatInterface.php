@@ -13,31 +13,67 @@ class ChatInterface extends Component
     public $messages = [];
     public $userInput = '';
     public $isLoading = false;
+    public $currentConversationId = null;
+    public $conversations = [];
+    public $showSidebar = true;
 
     public function mount()
     {
-        $this->loadConversationHistory();
+        $this->loadConversations();
+        $this->startNewConversation();
     }
 
-    public function loadConversationHistory()
+    public function loadConversations()
     {
-        $conversations = auth()->user()->conversations()->take(50)->get();
-        
-        $this->messages = [];
-        foreach ($conversations as $conversation) {
-            $this->messages[] = [
-                'type' => 'user',
-                'content' => $conversation->user_message,
-                'time' => $conversation->created_at->format('h:i A'),
-            ];
-            $this->messages[] = [
-                'type' => 'ai',
-                'content' => $conversation->ai_response,
-                'time' => $conversation->created_at->format('h:i A'),
+        $this->conversations = auth()->user()->conversations()
+            ->select('id', 'user_message', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(function($conv) {
+                return [
+                    'id' => $conv->id,
+                    'preview' => Str::limit($conv->user_message, 40),
+                    'time' => $conv->created_at->diffForHumans(),
+                ];
+            })
+            ->toArray();
+    }
+
+    public function loadConversation($conversationId)
+    {
+        $conversation = Conversation::where('user_id', auth()->id())
+            ->where('id', $conversationId)
+            ->first();
+            
+        if ($conversation) {
+            $this->currentConversationId = $conversationId;
+            $this->messages = [
+                [
+                    'type' => 'user',
+                    'content' => $conversation->user_message,
+                    'time' => $conversation->created_at->format('h:i A'),
+                ],
+                [
+                    'type' => 'ai',
+                    'content' => $conversation->ai_response,
+                    'time' => $conversation->created_at->format('h:i A'),
+                    'sources' => json_decode($conversation->sources ?? '[]', true),
+                ]
             ];
         }
-        
-        $this->messages = array_reverse($this->messages);
+    }
+
+    public function startNewConversation()
+    {
+        $this->currentConversationId = null;
+        $this->messages = [];
+        $this->userInput = '';
+    }
+
+    public function toggleSidebar()
+    {
+        $this->showSidebar = !$this->showSidebar;
     }
 
     public function sendMessage()
@@ -57,22 +93,29 @@ class ChatInterface extends Component
             'time' => now()->format('h:i A'),
         ];
 
-        // Simulate AI response (Replace with actual RAG implementation)
-        $aiResponse = $this->getAIResponse($userMessage);
+        // Get AI response with sources
+        $result = $this->getAIResponse($userMessage);
+        $aiResponse = $result['response'];
+        $sources = $result['sources'];
 
         // Add AI response to chat
         $this->messages[] = [
             'type' => 'ai',
             'content' => $aiResponse,
             'time' => now()->format('h:i A'),
+            'sources' => $sources,
         ];
 
         // Save to database
-        Conversation::create([
+        $conversation = Conversation::create([
             'user_id' => auth()->id(),
             'user_message' => $userMessage,
             'ai_response' => $aiResponse,
+            'sources' => json_encode($sources),
         ]);
+        
+        $this->currentConversationId = $conversation->id;
+        $this->loadConversations();
 
         $this->isLoading = false;
         
@@ -89,13 +132,20 @@ class ChatInterface extends Component
         $relevantChunks = $this->searchKnowledgeBase($keywords);
         
         if ($relevantChunks->isEmpty()) {
-            return "I apologize, but I couldn't find specific information about that in our Villa College knowledge base. Could you please rephrase your question or ask about our programs, admissions, campus facilities, or student life?";
+            return [
+                'response' => "I apologize, but I couldn't find specific information about that in our Villa College knowledge base. Could you please rephrase your question or ask about our programs, admissions, campus facilities, or student life?",
+                'sources' => []
+            ];
         }
         
-        // Build response from relevant chunks
+        // Build response from relevant chunks with sources
         $response = $this->buildResponse($message, $relevantChunks);
+        $sources = $relevantChunks->map(fn($chunk) => $chunk->source_url)->unique()->values()->toArray();
         
-        return $response;
+        return [
+            'response' => $response,
+            'sources' => $sources
+        ];
     }
     
     private function extractKeywords($message)
