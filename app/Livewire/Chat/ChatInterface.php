@@ -163,28 +163,113 @@ class ChatInterface extends Component
             return strlen($word) > 2 && !in_array($word, $stopWords);
         });
         
-        return array_values($keywords);
+        return [
+            'keywords' => array_values($keywords),
+            'phrases' => $this->extractPhrases($words, $stopWords),
+            'original' => $cleaned
+        ];
     }
     
-    private function searchKnowledgeBase($keywords)
+    private function extractPhrases($words, $stopWords)
     {
-        if (empty($keywords)) {
+        $phrases = [];
+        $filtered = array_filter($words, fn($w) => strlen($w) > 2 && !in_array($w, $stopWords));
+        $filtered = array_values($filtered);
+        
+        // Extract 2-word phrases
+        for ($i = 0; $i < count($filtered) - 1; $i++) {
+            $phrases[] = $filtered[$i] . ' ' . $filtered[$i + 1];
+        }
+        
+        // Extract 3-word phrases for more context
+        for ($i = 0; $i < count($filtered) - 2; $i++) {
+            $phrases[] = $filtered[$i] . ' ' . $filtered[$i + 1] . ' ' . $filtered[$i + 2];
+        }
+        
+        return array_unique($phrases);
+    }
+    
+    private function searchKnowledgeBase($extractedData)
+    {
+        if (empty($extractedData['keywords']) && empty($extractedData['phrases'])) {
             return collect([]);
         }
         
-        // Build query to search for keywords in content
+        // Get all potential matches
         $query = KnowledgeBase::query();
         
-        foreach ($keywords as $keyword) {
+        foreach ($extractedData['keywords'] as $keyword) {
             $query->orWhere('content', 'LIKE', "%{$keyword}%");
         }
         
-        // Get top 3 most relevant chunks
-        return $query->limit(3)->get();
+        $chunks = $query->get();
+        
+        // Score each chunk for relevance
+        $scoredChunks = $chunks->map(function($chunk) use ($extractedData) {
+            $score = $this->calculateRelevanceScore($chunk, $extractedData);
+            $chunk->relevance_score = $score;
+            return $chunk;
+        });
+        
+        // Sort by relevance score (highest first) and return top 5
+        return $scoredChunks
+            ->sortByDesc('relevance_score')
+            ->take(5)
+            ->values();
+    }
+    
+    private function calculateRelevanceScore($chunk, $extractedData)
+    {
+        $content = strtolower($chunk->content);
+        $score = 0;
+        
+        // Phrase matching (highest priority) - worth 10 points each
+        foreach ($extractedData['phrases'] as $phrase) {
+            $phraseCount = substr_count($content, $phrase);
+            $score += $phraseCount * 10;
+        }
+        
+        // Keyword frequency - worth 3 points each
+        foreach ($extractedData['keywords'] as $keyword) {
+            $keywordCount = substr_count($content, $keyword);
+            $score += $keywordCount * 3;
+        }
+        
+        // Keyword position bonus - if keyword appears in first 200 chars (likely title/intro)
+        $firstPart = substr($content, 0, 200);
+        foreach ($extractedData['keywords'] as $keyword) {
+            if (strpos($firstPart, $keyword) !== false) {
+                $score += 5; // Position bonus
+            }
+        }
+        
+        // Exact phrase in first 200 characters gets massive bonus
+        foreach ($extractedData['phrases'] as $phrase) {
+            if (strpos($firstPart, $phrase) !== false) {
+                $score += 15;
+            }
+        }
+        
+        // Multiple keyword matches bonus (indicates comprehensive content)
+        $uniqueMatches = 0;
+        foreach ($extractedData['keywords'] as $keyword) {
+            if (strpos($content, $keyword) !== false) {
+                $uniqueMatches++;
+            }
+        }
+        if ($uniqueMatches >= 3) {
+            $score += 8;
+        }
+        
+        return $score;
     }
     
     private function buildResponse($question, $chunks)
     {
+        if ($chunks->isEmpty()) {
+            return "I couldn't find relevant information about that.";
+        }
+        
         // Combine relevant content
         $context = $chunks->pluck('content')->implode("\n\n");
         
@@ -193,16 +278,21 @@ class ChatInterface extends Component
             return $context;
         }
         
-        // Build a structured response
+        // Build a structured response with most relevant content first
         $response = "Based on Villa College information:\n\n";
         
-        // Add each chunk as a point
+        // Add each chunk as a point (already sorted by relevance)
         foreach ($chunks as $index => $chunk) {
-            $snippet = Str::limit($chunk->content, 250);
-            $response .= $snippet . "\n\n";
+            $snippet = Str::limit($chunk->content, 300);
+            $response .= $snippet;
+            
+            // Add spacing between chunks
+            if ($index < $chunks->count() - 1) {
+                $response .= "\n\n";
+            }
         }
         
-        $response .= "If you need more specific information, please feel free to ask!";
+        $response .= "\n\nIf you need more specific information, please feel free to ask!";
         
         return $response;
     }
