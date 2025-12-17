@@ -12,7 +12,8 @@
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.4",
-        "openai-php/laravel": "^0.8.1"
+        "openai-php/laravel": "^0.8.1",
+        "smalot/pdfparser": "^2.12"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
