@@ -5,6 +5,7 @@ export default {
     "./resources/**/*.js",
     "./app/Livewire/**/*.php",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
