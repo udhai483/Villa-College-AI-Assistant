@@ -16,16 +16,28 @@
         </svg>
     </div>
 
-    <!-- Dark Mode Toggle -->
-    <button wire:click="toggleDarkMode" 
-            class="absolute top-4 right-4 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 group z-10">
-        <svg x-show="!darkMode" class="w-5 h-5 text-gray-600 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-        <svg x-show="darkMode" class="w-5 h-5 text-yellow-400 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-    </button>
+    <!-- Top Right Controls -->
+    <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
+        <!-- System Online Status Badge -->
+        <div class="flex items-center gap-2 text-xs font-medium text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span>System Online</span>
+        </div>
+        
+        <!-- Dark Mode Toggle -->
+        <button wire:click="toggleDarkMode" 
+                class="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <svg x-show="!darkMode" class="w-5 h-5 text-gray-600 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg x-show="darkMode" class="w-5 h-5 text-yellow-400 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        </button>
+    </div>
 
     <div class="max-w-4xl w-full space-y-12 relative z-10">
         <!-- Logo and Header -->
@@ -36,18 +48,11 @@
                 </svg>
             </div>
             <div class="space-y-3">
-                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center gap-3 flex-wrap">
-                    <span>Villa College AI Assistant</span>
-                    <!-- Live Status Indicator -->
-                    <span class="flex items-center gap-2 text-sm font-normal text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                        </span>
-                        System Online
-                    </span>
+                <h2 class="text-4xl text-gray-900 dark:text-white flex items-center justify-center gap-2 flex-wrap font-sans">
+                    <span class="font-bold">Villa College</span>
+                    <span class="font-light">AI Assistant</span>
                 </h2>
-                <p class="text-base text-gray-600 dark:text-gray-400">
+                <p class="text-base text-gray-600 dark:text-gray-400 font-sans">
                     Your intelligent chatbot powered by RAG technology
                 </p>
                 
