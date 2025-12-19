@@ -27,92 +27,42 @@
         </svg>
     </button>
 
-    <div class="max-w-6xl w-full space-y-8 relative z-10">
+    <div class="max-w-4xl w-full space-y-12 relative z-10">
         <!-- Logo and Header -->
-        <div class="text-center">
+        <div class="text-center space-y-6">
             <div class="mx-auto h-20 w-20 bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
                 <svg class="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                 </svg>
             </div>
-            <h2 class="mt-6 text-4xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center gap-3">
-                Villa College AI Assistant
-                <!-- Live Status Indicator -->
-                <span class="flex items-center gap-2 text-sm font-normal text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            <div class="space-y-3">
+                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center gap-3 flex-wrap">
+                    <span>Villa College AI Assistant</span>
+                    <!-- Live Status Indicator -->
+                    <span class="flex items-center gap-2 text-sm font-normal text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 rounded-full">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        System Online
                     </span>
-                    System Online
-                </span>
-            </h2>
-            <p class="mt-3 text-base text-gray-600 dark:text-gray-400">
-                Your intelligent chatbot powered by RAG technology
-            </p>
-            
-            <!-- What's New Badge -->
-            <div class="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-4 py-2 rounded-full">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-purple-800 dark:text-purple-300 bg-purple-200 dark:bg-purple-800 rounded-full">NEW</span>
-                <span class="text-sm text-purple-900 dark:text-purple-200 font-medium">Enhanced with Semantic Search & GPT-4</span>
+                </h2>
+                <p class="text-base text-gray-600 dark:text-gray-400">
+                    Your intelligent chatbot powered by RAG technology
+                </p>
+                
+                <!-- What's New Badge -->
+                <div class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 px-4 py-2 rounded-full">
+                    <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-purple-800 dark:text-purple-300 bg-purple-200 dark:bg-purple-800 rounded-full">NEW</span>
+                    <span class="text-sm text-purple-900 dark:text-purple-200 font-medium">Enhanced with Semantic Search & GPT-4</span>
+                </div>
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-3 gap-8 items-start">
-            <!-- Value Propositions - Left Side -->
-            <div class="lg:col-span-1 space-y-4 hidden lg:block">
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Instant Course Info</h3>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Get immediate answers about programs, admissions, and schedules</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">24/7 Student Support</h3>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Available anytime to help with your questions and concerns</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
-                    <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                                <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Research Assistance</h3>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Smart AI-powered search across our knowledge base</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Login Card - Center -->
-            <div class="lg:col-span-2">
-                <div class="card bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                    <div class="px-8 py-10">
+        <!-- Login Card - Centered -->
+        <div class="max-w-lg mx-auto">
+            <div class="card bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+                <div class="px-8 py-10">
                         <!-- Error Message -->
                 @if (session('error'))
                     <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
@@ -196,46 +146,53 @@
             </div>
         </div>
 
-        <!-- Value Propositions - Mobile (Below card) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:hidden">
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+        <!-- Value Propositions - Below login card in three-column grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+                <div class="flex items-start gap-4 flex-grow">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
                     </div>
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-900 dark:text-white">Instant Course Info</h3>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Get immediate answers</p>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Instant Course Info</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Get immediate answers about programs, admissions, and schedules</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+                <div class="flex items-start gap-4 flex-grow">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
                     </div>
                     <div>
-                        <h3 class="text-xs font-semibold text-gray-900 dark:text-white">24/7 Support</h3>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Available anytime</p>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">24/7 Student Support</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Available anytime to help with your questions and concerns</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-semibold text-gray-900 dark:text-white">AI Research</h3>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Smart assistance</p>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+                <div class="flex items-start gap-4 flex-grow">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Research Assistance</h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Smart AI-powered search across our knowledge base</p>
+                        </div>
                     </div>
                 </div>
             </div>
