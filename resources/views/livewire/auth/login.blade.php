@@ -144,7 +144,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- Value Propositions - Below login card in three-column grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
