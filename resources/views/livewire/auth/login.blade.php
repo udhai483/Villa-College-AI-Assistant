@@ -18,13 +18,43 @@
 
     <!-- Top Right Controls -->
     <div class="absolute top-4 right-4 flex items-center gap-3 z-10">
-        <!-- System Online Status Badge -->
-        <div class="flex items-center gap-2 text-xs font-medium text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg">
-            <span class="relative flex h-2 w-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span>System Online</span>
+        <!-- System Online Status Badge with Tooltip -->
+        <div class="relative group">
+            <div class="flex items-center gap-2 text-xs font-medium text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg cursor-pointer animate-pulse">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span>System Online</span>
+            </div>
+            
+            <!-- Tooltip - System Health Dashboard -->
+            <div class="absolute right-0 top-12 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                <h4 class="text-xs font-semibold text-gray-900 dark:text-white mb-3">System Health</h4>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-600 dark:text-gray-400">Knowledge Base</span>
+                        <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Active
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-600 dark:text-gray-400">Search Engine</span>
+                        <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Active
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-600 dark:text-gray-400">RAG System</span>
+                        <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                            Active
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Dark Mode Toggle -->
@@ -87,17 +117,19 @@
                     </div>
                 @endif
 
-                        <!-- Welcome Text -->
+                        <!-- Welcome Text with Typewriter Effect -->
                         <div class="text-center mb-8">
                             <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Welcome Back!</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm">Sign in with your Villa College account</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm" x-data="{ text: '', fullText: 'Sign in to access your intelligent assistant', index: 0 }" x-init="setInterval(() => { if (index < fullText.length) { text += fullText.charAt(index); index++; } }, 50)">
+                                <span x-text="text"></span><span class="animate-pulse">|</span>
+                            </p>
                         </div>
 
-                        <!-- Google Sign In Button - Refined -->
+                        <!-- Google Sign In Button - Refined with Hover Lift -->
                         <div class="space-y-4">
                             <a href="{{ route('auth.google') }}" 
                                id="google-signin-btn"
-                               class="w-full flex items-center justify-center gap-4 px-6 py-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-300 group">
+                               class="w-full flex items-center justify-center gap-4 px-6 py-4 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm bg-white dark:bg-gray-800 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
                                 <svg class="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -107,13 +139,13 @@
                                 <span class="text-gray-700 dark:text-gray-200 font-medium text-base">Sign in with Google</span>
                             </a>
 
-                            <!-- Skeleton Loader (hidden by default) -->
+                            <!-- Skeleton Loader - Enhanced with Shimmer -->
                             <div id="skeleton-loader" class="hidden">
-                                <div class="animate-pulse space-y-4">
-                                    <div class="h-14 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+                                <div class="relative overflow-hidden space-y-4">
+                                    <div class="h-14 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
                                     <div class="space-y-2">
-                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                                        <div class="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-3/4 animate-shimmer bg-[length:200%_100%]"></div>
+                                        <div class="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-1/2 animate-shimmer bg-[length:200%_100%]"></div>
                                     </div>
                                 </div>
                             </div>
@@ -142,6 +174,22 @@
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Contextual Suggested Prompts -->
+                        <div class="mt-8">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center mb-3">Try asking:</p>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <button class="px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors cursor-default">
+                                    📅 Semester dates?
+                                </button>
+                                <button class="px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors cursor-default">
+                                    📚 Library access?
+                                </button>
+                                <button class="px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors cursor-default">
+                                    🎓 Course requirements?
+                                </button>
                             </div>
                         </div>
                     </div>
