@@ -40,7 +40,7 @@
     </div>
 
     <!-- Main Container - Vertical Stack -->
-    <div class="max-w-6xl w-full space-y-16 relative z-10">
+    <div class="max-w-6xl w-full space-y-20 relative z-10">
         <!-- Logo and Header -->
         <div class="text-center space-y-6">
             <div class="mx-auto h-20 w-20 bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
@@ -66,7 +66,7 @@
         </div>
 
         <!-- Login Card - Centered Glassmorphism -->
-        <div class="max-w-lg mx-auto">
+        <div class="max-w-3xl mx-auto">
             <div class="backdrop-blur-lg bg-white/80 dark:bg-gray-800/80 shadow-xl border border-white/20 dark:border-gray-700/50 rounded-2xl transition-colors duration-300">
                 <div class="px-8 py-10">
                         <!-- Error Message -->
@@ -149,7 +149,7 @@
             </div>
 
         <!-- Value Propositions - 3-column grid at bottom -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700">
                 <div class="flex items-start gap-4">
                     <div class="flex-shrink-0">
