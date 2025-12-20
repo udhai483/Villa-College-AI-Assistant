@@ -2,7 +2,22 @@
      x-init="$watch('darkMode', value => $el.classList.toggle('dark', value))"
      @dark-mode-toggled.window="darkMode = $event.detail.darkMode"
      :class="{ 'dark': darkMode }"
-     class="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-primary-500/5 via-white to-primary-600/5 dark:from-primary-500/10 dark:via-gray-900 dark:to-primary-600/10 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+     class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300"
+     style="background: radial-gradient(at 20% 30%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+            radial-gradient(at 80% 20%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+            radial-gradient(at 40% 70%, rgba(186, 230, 253, 0.1) 0px, transparent 50%),
+            radial-gradient(at 90% 80%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+            linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);">
+    
+    <!-- Animated Mesh Gradient Overlay for Dark Mode -->
+    <div x-show="darkMode" 
+         class="absolute inset-0 z-0 transition-opacity duration-300"
+         style="background: radial-gradient(at 20% 30%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(3, 105, 161, 0.12) 0px, transparent 50%),
+                radial-gradient(at 40% 70%, rgba(7, 89, 133, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+                linear-gradient(180deg, #1f2937 0%, #111827 100%);">
+    </div>
     
     <!-- Geometric Background Pattern -->
     <div class="absolute inset-0 opacity-5 dark:opacity-10">
